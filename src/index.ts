@@ -20,3 +20,15 @@ export function bytesToBase64(bytes: Uint8Array): string {
 
 export * from './definitions'
 export { ThermalPrinter }
+
+// Balanza en vivo (Fase 5, ver docs/BALANZAS_DIGITALES_PLAN.md del repo pos) — plugin
+// separado, mismo módulo nativo. Reexportado acá para que un solo import del paquete
+// alcance para ambos; el registerPlugin real vive en index-balanza.ts.
+export { BalanzaSerial } from './index-balanza'
+export type {
+  BalanzaSerialPlugin,
+  BalanzaSerialDevice,
+  BalanzaSerialTarget,
+  BalanzaSerialDataEvent,
+  BalanzaSerialErrorEvent,
+} from './definitions-balanza'

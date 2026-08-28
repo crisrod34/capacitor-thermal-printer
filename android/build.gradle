@@ -1,7 +1,14 @@
 ext {
     junitVersion = project.hasProperty('junitVersion') ? rootProject.ext.junitVersion : '4.13.2'
     androidxAppCompatVersion = project.hasProperty('androidxAppCompatVersion') ? rootProject.ext.androidxAppCompatVersion : '1.7.1'
-    kotlinVersion = '1.9.22'
+    // Bumpeado desde 1.9.22: usb-serial-for-android:3.11.0 declara kotlin-stdlib:2.2.10 como
+    // dependencia directa (confirmado con `dependencyInsight`, no una suposición) — un
+    // compilador anterior no puede leer esa metadata hacia adelante (Kotlin garantiza
+    // compatibilidad hacia atrás, nunca hacia adelante). Alineado exacto a esa versión, no a
+    // "la más nueva disponible", para no arrastrar cambios de más. Sigue siendo compatible
+    // con AGP 8.2.1. Revisar CHANGELOG antes de subir pos/ a esta versión del plugin — ver
+    // docs/TRANSPORTES.md.
+    kotlinVersion = '2.2.10'
 }
 
 buildscript {
@@ -11,7 +18,10 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.2.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22"
+        // Literal, no "$kotlinVersion" — buildscript{} se evalúa antes que el ext{} de
+        // arriba pese al orden en el archivo (Gradle lo trata especial), así que la
+        // property todavía no existe en este punto. Mantener ambos literales sincronizados.
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10"
     }
 }
 
@@ -37,11 +47,16 @@ android {
 repositories {
     google()
     mavenCentral()
+    // usb-serial-for-android no está en Maven Central, solo JitPack (compila directo del
+    // repo de GitHub) — ver BalanzaSerialTransport.kt.
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
     implementation project(':capacitor-android')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    // Balanza en vivo (RS232 vía FTDI/CH340/CP210x/PL2303) — ver BalanzaSerialTransport.kt.
+    implementation "com.github.mik3y:usb-serial-for-android:3.11.0"
     testImplementation "junit:junit:$junitVersion"
 }
